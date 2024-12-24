@@ -21,6 +21,7 @@ class SQLStorageAdapter(StorageAdapter):
 
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
+        from sqlalchemy import inspect
 
         self.database_uri = kwargs.get('database_uri', False)
 
@@ -42,8 +43,9 @@ class SQLStorageAdapter(StorageAdapter):
             def set_sqlite_pragma(dbapi_connection, connection_record):
                 dbapi_connection.execute('PRAGMA journal_mode=WAL')
                 dbapi_connection.execute('PRAGMA synchronous=NORMAL')
-
-        if not self.engine.dialect.has_table(self.engine, 'Statement'):
+                
+        inspector = inspect(self.engine)
+        if not inspector.has_table('Statement'):
             self.create_database()
 
         self.Session = sessionmaker(bind=self.engine, expire_on_commit=True)
